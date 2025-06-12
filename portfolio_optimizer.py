@@ -1,24 +1,31 @@
-import cvxpy as cp
 import numpy as np
+import pandas as pd
+from scipy.optimize import minimize
 
-def optimize_portfolio(returns, max_weight=0.4, risk_aversion=0.5):
-    mu = returns.mean().values
-    Sigma = returns.cov().values
-    n = len(mu)
+def optimize_portfolio(returns: pd.DataFrame):
+    if returns is None or returns.empty or len(returns.columns) < 1:
+        print("No return data to optimize on.")
+        return {}
 
-    w = cp.Variable(n)
-    risk = cp.quad_form(w, Sigma)
-    expected_return = mu @ w
+    tickers = returns.columns.tolist()
+    cov_matrix = returns.cov()
+    mean_returns = returns.mean()
+    num_assets = len(tickers)
 
-    constraints = [
-        cp.sum(w) == 1,
-        w >= 0,
-        w <= max_weight
-    ]
+    def portfolio_volatility(weights):
+        return np.sqrt(np.dot(weights.T, np.dot(cov_matrix, weights)))
 
-    prob = cp.Problem(cp.Maximize(expected_return - risk_aversion * risk), constraints)
-    prob.solve()
+    constraints = ({'type': 'eq', 'fun': lambda x: np.sum(x) - 1})
+    bounds = tuple((0, 1) for _ in range(num_assets))
+    initial_guess = num_assets * [1. / num_assets]
 
-    weights = w.value
-    tickers = returns.columns
-    return dict(zip(tickers, weights.round(4)))
+    try:
+        result = minimize(portfolio_volatility, initial_guess, method='SLSQP',
+                          bounds=bounds, constraints=constraints)
+        if not result.success:
+            raise ValueError("Optimization failed")
+        weights = result.x
+        return dict(zip(tickers, weights.round(4)))
+    except Exception as e:
+        print(f"Portfolio optimization failed: {e}")
+        return {}
