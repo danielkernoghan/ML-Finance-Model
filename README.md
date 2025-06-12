@@ -2,6 +2,8 @@
 
 This project is an intelligent tool for evaluating stocks, ETFs, and commodities using a combination of historical data and live financial data. It outputs actionable **buy/hold/sell** signals and portfolio optimization recommendations.
 
+Version 1 also holds the original version of the model which aimed to include news sentiment. Workign on sourcing a reliable news API.
+
 ---
 
 ## 🔧 Features
