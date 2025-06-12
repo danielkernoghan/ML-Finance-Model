@@ -2,7 +2,7 @@ import requests
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from datetime import datetime, timedelta
 
-API_KEY = '665d3cb0ce534d5da4d72bafc4fd7bc3'
+API_KEY = 'API KEY'
 analyzer = SentimentIntensityAnalyzer()
 
 def get_sentiment(ticker):
